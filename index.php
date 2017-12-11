@@ -1,14 +1,6 @@
-bot.on('message', function(event) {
-  if (event.message.type = 'text') {
-    var msg = event.message.text;
-    event.reply(msg).then(function(data) {
-      // success 
-      console.log(msg);
-    }).catch(function(error) {
-      // error 
-      console.log('error');
-    });
-  }
+<?php
+ echo "R VEN";
+
 
 setTimeout(function(){
     var userId = '使用者 ID';
@@ -16,7 +8,6 @@ setTimeout(function(){
     bot.push(userId,sendMsg);
     console.log('send: '+sendMsg);
 },5000);
-
-});
+?>
 
 
