@@ -1,65 +1,67 @@
-/* 輸入申請的Line Developers 資料  */
-	$channel_id = "{1550905925}";
-	$channel_secret = "{026443ada574ef6fb4677cde38adfb81}";
-	$channel_access_token = "{ENorgWeG1JgAW7VqsmeYqD0rZN20Y+A++cqMWfUATyAP4gKYfqMcv5Aygg6EnHxYN2euFIkgeu2bi26KJDIKieq/Qki/yWzWZLygtpuB42wjcTweM9DnsYhaYLIcuaZkvs8vJcMPIKzm+P2GbW85wAdB04t89/1O/w1cDnyilFU=}";
+<?php
 
-	$myURL = "https://Your Domain/update/"
-
-
-//  當有人發送訊息給bot時 我們會收到的json
-// 	{
-// 	  "events": 
-// 	  [
-// 		  {
-// 			"replyToken": "nHuyWiB7yP5Zw52FIkcQobQuGDXCTA",
-// 			"type": "message",
-// 			"timestamp": 1462629479859,
-// 			"source": {
-// 				 "type": "user",
-// 				 "userId": "U206d25c2ea6bd87c17655609a1c37cb8"
-// 			 },
-// 			 "message": {
-// 				 "id": "325708",
-// 				 "type": "text",
-// 				 "text": "Hello, world"
-// 			  }
-// 		  }
-// 	  ]
-// 	}
-	 
-	 
-	// 將收到的資料整理至變數
-	$receive = json_decode(file_get_contents("php://input"));
-	
-	// 讀取收到的訊息內容
-	$text = $receive->events[0]->message->text;
-	
-	// 讀取訊息來源的類型 	[user, group, room]
-	$type = $receive->events[0]->source->type;
-	
-	// 由於新版的Messaging Api可以讓Bot帳號加入多人聊天和群組當中
-	// 所以在這裡先判斷訊息的來源
-	if ($type == "room")
-	{
-		// 多人聊天 讀取房間id
-		$from = $receive->events[0]->source->roomId;
-	} 
-	else if ($type == "group")
-	{
-		// 群組 讀取群組id
-		$from = $receive->events[0]->source->groupId;
-	}
-	else
-	{
-		// 一對一聊天 讀取使用者id
-		$from = $receive->events[0]->source->userId;
-	}
-	
-	// 讀取訊息的型態 [Text, Image, Video, Audio, Location, Sticker]
-	$content_type = $receive->events[0]->message->type;
-	
-	// 準備Post回Line伺服器的資料 
-	$header = ["Content-Type: application/json", "Authorization: Bearer {" . $channel_access_token . "}"];
-	
-	// 回覆訊息
-	reply($content_type, $text);
+error_reporting(0); // 不顯示錯誤 (Debug 時請註解掉)
+date_default_timezone_set("Asia/Taipei"); // 設定時區為台北時區
+require_once('LINEBotTiny.php');
+if (file_exists(__DIR__ . '/config.php')) {
+    $config = include __DIR__ . '/config.php'; // 引入設定檔
+    if ($config['channelAccessToken'] == Null || $config['channelSecret'] == Null) {
+        error_log("config.php 設定檔內的驗證權杖和粉絲專頁存取權杖尚未設定完全！", 0); // 輸出錯誤
+    } else {
+        $channelAccessToken = $config['channelAccessToken'];
+        $channelSecret = $config['channelSecret'];
+    }
+} else {
+    $configFile = fopen("config.php", "w") or die("Unable to open file!");
+    $configFileContent = "<?php
+    
+return [
+    'channelAccessToken' => '',
+    'channelSecret' => ''
+];
+?>";
+    fwrite($configFile, $configFileContent); // 建立文件並寫入
+    fclose($configFile); // 關閉文件
+    error_log("config.php 設定檔建立成功，請編輯檔案輸入驗證權杖和粉絲專頁存取權杖！", 0); // 輸出錯誤
+}
+$client = new LINEBotTiny($channelAccessToken, $channelSecret);
+foreach ($client->parseEvents() as $event) {
+    switch ($event['type']) {
+        case 'message':
+            $message = $event['message'];
+            switch ($message['type']) {
+                case 'text':
+                    require_once('includes/text.php'); // Type: Text
+                    require_once('includes/image.php'); // Type: Image
+                    require_once('includes/video.php'); // Type: Video
+                    require_once('includes/audio.php'); // Type: Audio
+                    require_once('includes/location.php'); // Type: Location
+                    require_once('includes/sticker.php'); // Type: Sticker
+                    require_once('includes/imagemap.php'); // Type: Imagemap
+                    require_once('includes/template.php'); // Type: Template
+                    break;
+                default:
+                    //error_log("Unsupporeted message type: " . $message['type']);
+                    break;
+            }
+            break;
+        case 'postback':
+            //require_once('postback.php'); // postback
+            break;
+        default:
+            //error_log("Unsupporeted event type: " . $event['type']);
+            $client->replyMessage(array(
+                'replyToken' => $event['replyToken'],
+                'messages' => array(
+                    array(
+                        'type' => 'text',
+                        'text' => '大家好，這是一個範例 Bot OuO
+範例程式開源至 GitHub (包含教學)：
+https://even-lard.herokuapp.com/'
+                    )
+                )
+            ));
+            break;
+    }
+};
+?>
