@@ -1,32 +1,36 @@
 <?php
-require_once('./LINEBotTiny.php');
-$channelAccessToken = '<ENorgWeG1JgAW7VqsmeYqD0rZN20Y+A++cqMWfUATyAP4gKYfqMcv5Aygg6EnHxYN2euFIkgeu2bi26KJDIKieq/Qki/yWzWZLygtpuB42wjcTweM9DnsYhaYLIcuaZkvs8vJcMPIKzm+P2GbW85wAdB04t89/1O/w1cDnyilFU=>';
-$channelSecret = '<026443ada574ef6fb4677cde38adfb81>';
-$client = new LINEBotTiny($channelAccessToken, $channelSecret);
-foreach ($client->parseEvents() as $event) {
-    switch ($event['type']) {
-        case 'message':
-            $message = $event['message'];
-            switch ($message['type']) {
-                case 'text':
-                    $client->replyMessage(array(
-                        'replyToken' => $event['replyToken'],
-                        'messages' => array(
-                            array(
-                                'type' => 'text',
-                                'text' => $message['text']
-                            )
-                        )
-                    ));
-                    break;
-                default:
-                    error_log("Unsupporeted message type: " . $message['type']);
-                    break;
-            }
-            break;
-        default:
-            error_log("Unsupporeted event type: " . $event['type']);
-            break;
-    }
-};
+	/* 輸入申請的Line Developers 資料  */
+	$channel_id = "1550905925";
+	$channel_secret = "026443ada574ef6fb4677cde38adfb81";
+	$mid = "Ua535935262d7d44484cbb40b6417eae2";
+	 
+	/* 將收到的資料整理至變數 */
+	$receive = json_decode(file_get_contents("php://input"));
+	$text = $receive->result{0}->content->text;
+	$from = $receive->result[0]->content->from;
+	$content_type = $receive->result[0]->content->contentType;
+	 
+	/* 準備Post回Line伺服器的資料 */
+	$header = ["Content-Type: application/json; charser=UTF-8", "X-Line-ChannelID:" . $channel_id, "X-Line-ChannelSecret:" . $channel_secret, "X-Line-Trusted-User-With-ACL:" . $mid];
+	$message = getBoubouMessage($content_type, $text);
+	sendMessage($header, $from, $message);
+	 
+	/* 發送訊息 */
+	function sendMessage($header, $to, $message) {
+	 
+		$url = "https://trialbot-api.line.me/v1/events";
+		$data = ["to" => [$to], "toChannel" => 1383378250, "eventType" => "138311608800106203", "content" => ["contentType" => 1, "toType" => 1, "text" => $message]];
+		$context = stream_context_create(array(
+		"http" => array("method" => "POST", "header" => implode(PHP_EOL, $header), "content" => json_encode($data), "ignore_errors" => true)
+		));
+		file_get_contents($url, false, $context);
+	}
+	 
+	function getBoubouMessage( $type, $value){	
+		if($type == 1){
+			return "寶寶" . $value ."，只是寶寶不說";
+		}else{
+			return "寶寶看不懂，只是寶寶不說";
+		}
+	}
 ?>
