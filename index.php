@@ -32,8 +32,8 @@ if (file_exists(__DIR__ . '/config.php')) {
  * 官方文檔：https://devdocs.line.me/en/
  */
 return [
-    'channelAccessToken' => '',
-    'channelSecret' => ''
+    'channelAccessToken' => 'ENorgWeG1JgAW7VqsmeYqD0rZN20Y+A++cqMWfUATyAP4gKYfqMcv5Aygg6EnHxYN2euFIkgeu2bi26KJDIKieq/Qki/yWzWZLygtpuB42wjcTweM9DnsYhaYLIcuaZkvs8vJcMPIKzm+P2GbW85wAdB04t89/1O/w1cDnyilFU=',
+    'channelSecret' => '026443ada574ef6fb4677cde38adfb81'
 ];
 ?>";
     fwrite($configFile, $configFileContent); // 建立文件並寫入
