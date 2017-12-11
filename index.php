@@ -1,164 +1,33 @@
 <?php
  echo "R VEN";
 ?>
-const secret = "026443ada574ef6fb4677cde38adfb81"; // 您的 Channel Secret
-const id = "1550905925"; // 您的 Channel ID
-const mid = "Ua535935262d7d44484cbb40b6417eae2"; // 您的 MID 
-const weather_key = "f25532d7b41fbb5ade69cbb04724e0db"; // openweathermap API key
-
-var http = require('http');
-var bodyParser = require('body-parser');
-var express = require('express');
-var request = require('request');
-
-var port = process.env.port || 1337
-var app = express();
-app.use(bodyParser.json());
-
-// 接聽來自Line伺服器中的訊息，交由Function receiver處理
-app.post('/callback', function (req, res) {
-    receiver(req, res);
-});
-
-// 開啟伺服器
-http.createServer(app).listen(port);
-
-function getSign(event) {
-    var crypto = require('crypto');
-    var body = new Buffer(JSON.stringify(event.body), 'utf8');
-    // secret 為您的 Channel secret     
-    var hash = crypto.createHmac('sha256', secret).update(body).digest('base64');
-    return hash
-}
-function receiver(req, res) {
-    var data = req.body;
-    if (getSign(req) == req.get("X-LINE-ChannelSignature")) {
-        // ChannelSignature 正確，處理訊息
-        data.result.forEach(function (result) {
-            var type = result.content.contentType;
-            if (type == "1") {
-                sendTextMessage(result.content.from, "傳送您的位置來獲得天氣訊息");
+require_once('./LINEBotTiny.php');
+$channelAccessToken = '<ENorgWeG1JgAW7VqsmeYqD0rZN20Y+A++cqMWfUATyAP4gKYfqMcv5Aygg6EnHxYN2euFIkgeu2bi26KJDIKieq/Qki/yWzWZLygtpuB42wjcTweM9DnsYhaYLIcuaZkvs8vJcMPIKzm+P2GbW85wAdB04t89/1O/w1cDnyilFU=>';
+$channelSecret = '<026443ada574ef6fb4677cde38adfb81>';
+$client = new LINEBotTiny($channelAccessToken, $channelSecret);
+foreach ($client->parseEvents() as $event) {
+    switch ($event['type']) {
+        case 'message':
+            $message = $event['message'];
+            switch ($message['type']) {
+                case 'text':
+                    $client->replyMessage(array(
+                        'replyToken' => $event['replyToken'],
+                        'messages' => array(
+                            array(
+                                'type' => 'text',
+                                'text' => $message['text']
+                            )
+                        )
+                    ));
+                    break;
+                default:
+                    error_log("Unsupporeted message type: " . $message['type']);
+                    break;
             }
-            else if (type == "8") {
-                // 傳送一張隨機貼圖
-                sendSticker(result.content.from, 4, getRandom(260, 289));
-            }
-            else if (type == "7")//location
-            {
-                // 傳送天氣訊息
-                sendWeather(result.content.from, result.content.location.latitude, result.content.location.longitude)
-            }
-
-        });
-        res.sendStatus(200);
+            break;
+        default:
+            error_log("Unsupporeted event type: " . $event['type']);
+            break;
     }
-    else
-        res.sendStatus(403); //ChannelSignature錯誤，回傳403
-
-}
-function sendWeather(recipientId, lat, lng) {
-    // 查詢天氣，設定語言為繁體中文，溫度單位為攝氏溫度
-    request({
-        uri: 'http://api.openweathermap.org/data/2.5/weather',
-        qs: {
-            appid: weather_key,
-            lat: lat,
-            lon: lng,
-            lang: "zh_tw",
-            units: "metric"
-        },
-        method: 'GET',
-    },
-
-        function (error, response, body) {
-            //Check for error
-            if (error) {
-                return console.log('Error:', error);
-            }
-
-            //Check for right status code
-            if (response.statusCode !== 200) {
-                return console.log('Invalid Status Code Returned:', response.statusCode, response.statusMessage);
-            }
-            var data = JSON.parse(body);
-            // 傳送 城市名稱 天氣狀況 溫度
-            sendTextMessage(recipientId, data.name + " " + data.weather[0].description + " 溫度:" + data.main.temp)
-            // 傳送和天氣有關的貼圖
-            var icon = data.weather[0].icon[0] + data.weather[0].icon[1];
-            if (icon == "01" || icon == "02") //晴天
-                sendSticker(recipientId, 4, 263);
-            else if (icon == "03" || icon == "04") //多雲
-                sendSticker(recipientId, 4, 264);
-            else //雨天
-                sendSticker(recipientId, 4, 266);
-
-        }
-
-
-    );
-}
-function getRandom(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function sendSticker(recipientId, s_pack, s_id) {
-    var messageData = {
-        to: [recipientId],
-        toChannel: 1383378250,
-        eventType: "138311608800106203",
-        content: {
-            contentType: 8,
-            toType: 1,
-            contentMetadata: {
-                STKID: s_id + '',
-                STKPKGID: s_pack + ''
-            }
-        }
-    };
-
-    toLine(messageData);
-}
-function sendTextMessage(recipientId, messageText) {
-    var messageData = {
-        to: [recipientId],
-        toChannel: 1383378250,
-        eventType: "138311608800106203",
-        content: {
-            contentType: 1,
-            toType: 1,
-            text: messageText
-        }
-    };
-    toLine(messageData);
-}
-function toLine(messageData) {
-    request({
-        uri: 'https://trialbot-api.line.me/v1/events',
-        headers: {
-            "Content-type": "application/json; charser=UTF-8",
-            "X-Line-ChannelID": id,
-            "X-Line-ChannelSecret": secret,
-            "X-Line-Trusted-User-With-ACL": mid
-        },
-        method: 'POST',
-        json: messageData
-    },
-        function (error, response, body) {
-            //Check for error
-            if (error) {
-                return console.log('Error:', error);
-            }
-
-            //Check for right status code
-            if (response.statusCode !== 200) {
-                return console.log('Invalid Status Code Returned:', response.statusCode, response.statusMessage);
-            }
-
-            //All is good. Print the body
-            console.log(body); // Show the HTML for the Modulus homepage.
-
-        }
-
-
-    );
-}
+};
