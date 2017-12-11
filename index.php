@@ -1,5 +1,13 @@
 <?php
-
+/**
+ * Copyright 2017 GoneTone
+ *
+ * Line Bot
+ * 範例 Example Bot 執行主文件
+ *
+ * 此範例 GitHub 專案：https://github.com/GoneTone/line-example-bot-php
+ * 官方文檔：https://devdocs.line.me/en/
+ */
 error_reporting(0); // 不顯示錯誤 (Debug 時請註解掉)
 date_default_timezone_set("Asia/Taipei"); // 設定時區為台北時區
 require_once('LINEBotTiny.php');
@@ -14,7 +22,15 @@ if (file_exists(__DIR__ . '/config.php')) {
 } else {
     $configFile = fopen("config.php", "w") or die("Unable to open file!");
     $configFileContent = "<?php
-    
+/**
+ * Copyright 2017 GoneTone
+ *
+ * Line Bot
+ * 範例 Example Bot 配置文件
+ *
+ * 此範例 GitHub 專案：https://github.com/GoneTone/line-example-bot-php
+ * 官方文檔：https://devdocs.line.me/en/
+ */
 return [
     'channelAccessToken' => '',
     'channelSecret' => ''
@@ -57,7 +73,7 @@ foreach ($client->parseEvents() as $event) {
                         'type' => 'text',
                         'text' => '大家好，這是一個範例 Bot OuO
 範例程式開源至 GitHub (包含教學)：
-https://even-lard.herokuapp.com/'
+https://github.com/GoneTone/line-example-bot-php'
                     )
                 )
             ));
