@@ -1,3 +1,6 @@
+<?PHP
+
+
 if (strtolower($message['text']) == "text" || $message['text'] == "文字"){
     $client->replyMessage(array(
         'replyToken' => $event['replyToken'],
@@ -9,3 +12,5 @@ if (strtolower($message['text']) == "text" || $message['text'] == "文字"){
         )
     ));
 }
+
+?>
