@@ -1,6 +1,6 @@
 <?php
  echo "R VEN";
-?>
+
 
 setTimeout(function(){
     var userId = '使用者 ID';
@@ -8,3 +8,5 @@ setTimeout(function(){
     bot.push(userId,sendMsg);
     console.log('send: '+sendMsg);
 },5000);
+
+?>
