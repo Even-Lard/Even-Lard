@@ -1,7 +1,7 @@
-const secret = "1fdbe6c889a382281ff0954b541e3ebe"; // 您的 Channel Secret
-const id = "1475722841"; // 您的 Channel ID
-const mid = "u03751d74c237fe741813b789e8ab43a2"; // 您的 MID 
-const weather_key = "16b8c42d665cb0410dab109736c1c20d"; // openweathermap API key
+const secret = "026443ada574ef6fb4677cde38adfb81"; // 您的 Channel Secret
+const id = "1550905925"; // 您的 Channel ID
+const mid = "Ua535935262d7d44484cbb40b6417eae2"; // 您的 MID 
+const weather_key = "f25532d7b41fbb5ade69cbb04724e0db"; // openweathermap API key
 
 var http = require('http');
 var bodyParser = require('body-parser');
