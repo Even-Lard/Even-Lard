@@ -1,4 +1,5 @@
-const secret = "026443ada574ef6fb4677cde38adfb81";
+<?
+    const secret = "026443ada574ef6fb4677cde38adfb81";
 
 var http = require('http');
 var bodyParser = require('body-parser');
@@ -33,3 +34,4 @@ function receiver(req, res) {
         res.sendStatus(403); //ChannelSignature錯誤，回傳403
 
 }
+?>
