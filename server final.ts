@@ -1,3 +1,4 @@
+<?
 const secret = "026443ada574ef6fb4677cde38adfb81"; // 您的 Channel Secret
 const id = "1550905925"; // 您的 Channel ID
 const mid = "Ua535935262d7d44484cbb40b6417eae2"; // 您的 MID 
@@ -159,3 +160,4 @@ function toLine(messageData) {
 
     );
 }
+?>
